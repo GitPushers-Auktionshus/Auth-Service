@@ -8,6 +8,12 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 using AuthServiceAPI.Model;
 using DnsClient;
+using VaultSharp;
+using VaultSharp.V1.AuthMethods.Token;
+using VaultSharp.V1.AuthMethods;
+using VaultSharp.V1.Commons;
+
+ 
 
 namespace AuthServiceAPI.Controllers;
 
@@ -17,30 +23,29 @@ public class AuthServiceController : ControllerBase
 {
     private readonly ILogger<AuthServiceController> _logger;
 
-    private readonly string _secret;
-    private readonly string _issuer;
-    private readonly string _connectionURI;
+    private readonly string _hostnameVault;
     private readonly string _databaseName;
     private readonly string _collectionName;
-
+    private readonly string? _secret;
+    private readonly string? _issuer;
+    private readonly string _connectionURI;
 
     private readonly IMongoCollection<User> _users;
     private readonly IConfiguration _config;
 
-    public AuthServiceController(ILogger<AuthServiceController> logger, IConfiguration config)
+    public AuthServiceController(ILogger<AuthServiceController> logger, IConfiguration config, EnviromentVariables tester)
     {
         _logger = logger;
         _config = config;
 
-        _secret = config["Secret"] ?? "Secret missing";
-        _issuer = config["Issuer"] ?? "Issue'er missing";
-        _connectionURI = config["ConnectionURI"] ?? "ConnectionURI missing";
+        _hostnameVault = config["HostnameVault"] ?? "HostnameVault missing";
         _databaseName = config["DatabaseName"] ?? "DatabaseName missing";
         _collectionName = config["CollectionName"] ?? "CollectionName missing";
+        _secret = tester.dictionary["Secret"];
+        _issuer = tester.dictionary["Issuer"];
+        _connectionURI = tester.dictionary["ConnectionURI"];
 
-
-
-        _logger.LogInformation($"AuthService variables: Secret: {_secret}, Issuer: {_issuer}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
+        _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
 
 
         try
