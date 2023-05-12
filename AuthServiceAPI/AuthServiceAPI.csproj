@@ -17,6 +17,7 @@
     <PackageReference Include="NLog" Version="5.1.4" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
     <PackageReference Include="NLog.Targets.Loki" Version="1.4.6" />
+    <PackageReference Include="VaultSharp" Version="1.13.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +30,6 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
         <None Remove="NLog.Targets.Loki" />
+        <None Remove="VaultSharp" />
   </ItemGroup>
 </Project>
