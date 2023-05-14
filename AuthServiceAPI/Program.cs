@@ -11,16 +11,19 @@ using VaultSharp.V1.AuthMethods;
 using VaultSharp.V1.AuthMethods.Token;
 using VaultSharp.V1.Commons;
 
+// Sets up NLog as default loggingtool 
 var logger = NLog.LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+
 logger.Debug("init main");
 
 try
 {
     var builder = WebApplication.CreateBuilder(args);
 
-
+    // Retrieves Vault hostname from dockercompose file
     string hostnameVault = Environment.GetEnvironmentVariable("HostnameVault") ?? "none";
 
+    // Sets up the Vault using the endpoint of the Vault
     var EndPoint = $"http://{hostnameVault}:8200/";
     var httpClientHandler = new HttpClientHandler();
     httpClientHandler.ServerCertificateCustomValidationCallback =
@@ -29,7 +32,8 @@ try
     // Initialize one of the several auth methods.
     IAuthMethodInfo authMethod =
     new TokenAuthMethodInfo("00000000-0000-0000-0000-000000000000");
-    // Initialize settings. You can also set proxies, custom delegates etc. here.
+
+    // Initialize vault settings.
     var vaultClientSettings = new VaultClientSettings(EndPoint, authMethod)
     {
         Namespace = "",
@@ -39,17 +43,20 @@ try
         }
     };
 
+    // Initialize vault client
     IVaultClient vaultClient = new VaultClient(vaultClientSettings);
 
-    // Use client to read a key-value secret.
+    // Uses vault client to read key-value secrets.
     Secret<SecretData> enviromentVariables = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "enviromentVariables", mountPoint: "secret");
     Secret<SecretData> connectionString = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "connectionStrings", mountPoint: "secret");
 
+    // Initialized string variables to store enviroment secrets
     string? secret = enviromentVariables.Data.Data["Secret"].ToString();
     string? issuer = enviromentVariables.Data.Data["Issuer"].ToString();
     string? connectionURI = connectionString.Data.Data["ConnectionURI"].ToString();
 
-    EnviromentVariables test = new EnviromentVariables
+    // Creates and EnviromentVariable object with a dictionary to contain the secrets
+    EnviromentVariables vaultSecrets = new EnviromentVariables
     {
         dictionary = new Dictionary<string, string>
         {
@@ -59,11 +66,13 @@ try
         }
     };
 
-    builder.Services.AddSingleton<EnviromentVariables>(test);
-
+    // Adds the EnviromentVariable object to the project as a singleton.
+    // It can now be accessed wihtin the entire projekt
+    builder.Services.AddSingleton<EnviromentVariables>(vaultSecrets);
 
     logger.Info($"Variables loaded in program.cs: Secret: {secret}, Issuer: {issuer}, ConnectionURI : {connectionURI}");
 
+    // Adds functionality allowing our project to verify JWT-tokens
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -81,13 +90,13 @@ try
         }
         );
 
-    // Add services to the container.
 
+    // Add services to the container.
     builder.Services.AddControllers();
-    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    // Adds NLog to our project
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
@@ -117,5 +126,6 @@ catch (Exception ex)
 }
 finally
 {
+    // Shuts down NLog
     NLog.LogManager.Shutdown();
 }
