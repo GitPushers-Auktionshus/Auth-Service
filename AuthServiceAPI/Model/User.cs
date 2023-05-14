@@ -7,8 +7,7 @@ namespace AuthServiceAPI.Model
     public class User
     {
         [BsonId]
-        [BsonElement(elementName: "_id")]
-        public ObjectId UserID { get; set; }
+        public string UserID { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
         public string? FirstName { get; set; }
