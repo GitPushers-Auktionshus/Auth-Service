@@ -23,6 +23,7 @@ public class AuthServiceController : ControllerBase
 {
     private readonly ILogger<AuthServiceController> _logger;
 
+    // Initializes enviroment variables
     private readonly string _hostnameVault;
     private readonly string _databaseName;
     private readonly string _collectionName;
@@ -30,35 +31,47 @@ public class AuthServiceController : ControllerBase
     private readonly string? _issuer;
     private readonly string _connectionURI;
 
+    // Initializes MongoDB database collection
     private readonly IMongoCollection<User> _users;
     private readonly IConfiguration _config;
 
-    public AuthServiceController(ILogger<AuthServiceController> logger, IConfiguration config, EnviromentVariables tester)
+    public AuthServiceController(ILogger<AuthServiceController> logger, IConfiguration config, EnviromentVariables vaultSecrets)
     {
         _logger = logger;
         _config = config;
 
-        _hostnameVault = config["HostnameVault"] ?? "HostnameVault missing";
-        _databaseName = config["DatabaseName"] ?? "DatabaseName missing";
-        _collectionName = config["CollectionName"] ?? "CollectionName missing";
-        _secret = tester.dictionary["Secret"];
-        _issuer = tester.dictionary["Issuer"];
-        _connectionURI = tester.dictionary["ConnectionURI"];
+        try
+        {
+            // Retrieves enviroment variables from dockercompose file
+            _hostnameVault = config["HostnameVault"] ?? "HostnameVault missing";
+            _databaseName = config["DatabaseName"] ?? "DatabaseName missing";
+            _collectionName = config["CollectionName"] ?? "CollectionName missing";
 
-        _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
+            // Retrieves enviroment variables from program.cs, from injected EnviromentVariables class 
+            _secret = vaultSecrets.dictionary["Secret"];
+            _issuer = vaultSecrets.dictionary["Issuer"];
+            _connectionURI = vaultSecrets.dictionary["ConnectionURI"];
 
+            _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Error retrieving enviroment variables");
+
+            throw;
+        }
 
         try
         {
-            // Client
+            // Sets MongoDB client
             var mongoClient = new MongoClient(_connectionURI);
             _logger.LogInformation($"[*] CONNECTION_URI: {_connectionURI}");
 
-            // Database
+            // Sets MongoDB Database
             var database = mongoClient.GetDatabase(_databaseName);
             _logger.LogInformation($"[*] DATABASE: {_databaseName}");
 
-            // Collection
+            // Sets MongoDB Collection
             _users = database.GetCollection<User>(_collectionName);
             _logger.LogInformation($"[*] COLLECTION: {_collectionName}");
 
@@ -70,7 +83,7 @@ public class AuthServiceController : ControllerBase
         }
     }
 
-    // Login POST - Godkender legitimationsoplysninger og udsteder JWT-token
+    // Login POST - Authorizes a user and returns a JWT-token
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
@@ -82,6 +95,8 @@ public class AuthServiceController : ControllerBase
             //Looks up our user in the DB
             User user = await _users.Find(u => u.Username == userDTO.Username).FirstOrDefaultAsync<User>();
 
+            // Checks if user exists. If it doesn't or/and the password provided is false it returns unauthorized.
+            // Otherwise it returns a generated JWT-token
             if (user == null)
             {
                 _logger.LogError("User not found");
@@ -102,6 +117,10 @@ public class AuthServiceController : ControllerBase
             }
             else
             {
+                // Calls the method that generates the token including the users username
+
+                _logger.LogInformation("User authorized");
+
                 var token = GenerateJwtToken(user.Username);
 
                 return Ok(new { token });
