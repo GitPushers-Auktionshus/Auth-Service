@@ -16,7 +16,7 @@ public class AuthTestController : ControllerBase
 
     // Tests if verification works and authorizes. Returns unauthorized if not
     [Authorize]
-    [HttpGet("all")]
+    [HttpGet("verify")]
     public async Task<IActionResult> Get()
     {
         return Ok("You're authorized");
