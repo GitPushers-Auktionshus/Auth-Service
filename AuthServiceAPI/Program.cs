@@ -96,6 +96,12 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
+    builder.Services.AddAuthorization(options =>
+    {
+        options.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "admin"));
+    });
+
+
     // Adds NLog to our project
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
