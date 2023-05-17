@@ -31,5 +31,9 @@
     </None>
         <None Remove="NLog.Targets.Loki" />
         <None Remove="VaultSharp" />
+        <None Remove="Service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service\" />
   </ItemGroup>
 </Project>
