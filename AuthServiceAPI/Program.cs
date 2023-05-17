@@ -2,6 +2,7 @@ using System.Security.AccessControl;
 using System.Security.Claims;
 using System.Text;
 using AuthServiceAPI.Model;
+using AuthServiceAPI.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NLog;
@@ -69,6 +70,8 @@ try
     // Adds the EnviromentVariable object to the project as a singleton.
     // It can now be accessed wihtin the entire projekt
     builder.Services.AddSingleton<EnviromentVariables>(vaultSecrets);
+    builder.Services.AddSingleton<IAuthenticationRepository, MongoDBService>();
+
 
     logger.Info($"Variables loaded in program.cs: Secret: {secret}, Issuer: {issuer}, ConnectionURI : {connectionURI}");
 
