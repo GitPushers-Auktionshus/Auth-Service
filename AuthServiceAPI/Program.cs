@@ -54,6 +54,7 @@ try
     // Initialized string variables to store enviroment secrets
     string? secret = enviromentVariables.Data.Data["Secret"].ToString();
     string? issuer = enviromentVariables.Data.Data["Issuer"].ToString();
+    string? salt = enviromentVariables.Data.Data["Salt"].ToString();
     string? connectionURI = connectionString.Data.Data["ConnectionURI"].ToString();
 
     // Creates and EnviromentVariable object with a dictionary to contain the secrets
@@ -63,7 +64,8 @@ try
         {
             { "Secret", secret },
             { "Issuer", issuer },
-            { "ConnectionURI", connectionURI }
+            { "ConnectionURI", connectionURI },
+            { "Salt", salt }
         }
     };
 
@@ -73,7 +75,7 @@ try
     builder.Services.AddSingleton<IAuthenticationRepository, MongoDBService>();
 
 
-    logger.Info($"Variables loaded in program.cs: Secret: {secret}, Issuer: {issuer}, ConnectionURI : {connectionURI}");
+    logger.Info($"Variables loaded in program.cs: Secret: {secret}, Issuer: {issuer}, ConnectionURI : {connectionURI}, Salt : {salt}");
 
     // Adds functionality allowing our project to verify JWT-tokens
     builder.Services
