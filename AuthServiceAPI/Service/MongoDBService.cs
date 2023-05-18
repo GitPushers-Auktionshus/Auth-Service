@@ -20,6 +20,7 @@ namespace AuthServiceAPI.Service
         private readonly string _collectionName;
         private readonly string? _secret;
         private readonly string? _issuer;
+        private readonly string? _salt;
         private readonly string _connectionURI;
 
         // Initializes MongoDB database collection
@@ -40,9 +41,10 @@ namespace AuthServiceAPI.Service
                 // Retrieves enviroment variables from program.cs, from injected EnviromentVariables class 
                 _secret = vaultSecrets.dictionary["Secret"];
                 _issuer = vaultSecrets.dictionary["Issuer"];
+                _salt = vaultSecrets.dictionary["Salt"];
                 _connectionURI = vaultSecrets.dictionary["ConnectionURI"];
 
-                _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
+                _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, Salt: {_salt}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
 
             }
             catch (Exception ex)
@@ -98,7 +100,7 @@ namespace AuthServiceAPI.Service
                 }
                 else
                 {
-                    string hashedPassword = HashPassword(userDTO.Password);
+                    string hashedPassword = HashPassword(userDTO.Password, _salt);
 
                     if (hashedPassword == user.Password)
                     {
@@ -148,9 +150,9 @@ namespace AuthServiceAPI.Service
 
         // Method for password hashing.
         // Using BCrypt-package to salt and hash a password string.
-        public static string HashPassword(string password)
+        public static string HashPassword(string password, string salt)
         {
-            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string hashSalt = salt;
             string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, salt);
 
             return hashedPassword;
