@@ -96,22 +96,23 @@ namespace AuthServiceAPI.Service
 
                     return "Unauthorized";
                 }
-                else if (user.Password != userDTO.Password)
-                {
-                    _logger.LogError("Wrong password");
-
-                    return "Unauthorized";
-                }
                 else
                 {
-                    // Calls the method that generates the token including the users username
+                    string hashedPassword = HashPassword(userDTO.Password);
 
-                    _logger.LogInformation("User authorized");
+                    if (hashedPassword == user.Password)
+                    {
+                        _logger.LogInformation("User authorized");
 
-                    return "Authorized";
+                        return "Authorized";
+                    }
+                    else
+                    {
+                        _logger.LogError("Wrong password");
 
+                        return "Unauthorized";
+                    }
                 }
-
             }
             catch (Exception ex)
             {
@@ -143,6 +144,16 @@ namespace AuthServiceAPI.Service
             _logger.LogInformation($"Generated token for user {username}");
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        // Method for password hashing.
+        // Using BCrypt-package to salt and hash a password string.
+        public static string HashPassword(string password)
+        {
+            string salt = BCrypt.Net.BCrypt.GenerateSalt();
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password, salt);
+
+            return hashedPassword;
         }
 
     }
