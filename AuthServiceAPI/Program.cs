@@ -48,17 +48,17 @@ try
     IVaultClient vaultClient = new VaultClient(vaultClientSettings);
 
     // Uses vault client to read key-value secrets.
-    Secret<SecretData> enviromentVariables = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "enviromentVariables", mountPoint: "secret");
+    Secret<SecretData> environmentVariables = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "environmentVariables", mountPoint: "secret");
     Secret<SecretData> connectionString = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "connectionStrings", mountPoint: "secret");
 
     // Initialized string variables to store enviroment secrets
-    string? secret = enviromentVariables.Data.Data["Secret"].ToString();
-    string? issuer = enviromentVariables.Data.Data["Issuer"].ToString();
-    string? salt = enviromentVariables.Data.Data["Salt"].ToString();
+    string? secret = environmentVariables.Data.Data["Secret"].ToString();
+    string? issuer = environmentVariables.Data.Data["Issuer"].ToString();
+    string? salt = environmentVariables.Data.Data["Salt"].ToString();
     string? connectionURI = connectionString.Data.Data["ConnectionURI"].ToString();
 
     // Creates and EnviromentVariable object with a dictionary to contain the secrets
-    EnviromentVariables vaultSecrets = new EnviromentVariables
+    EnvVariables vaultSecrets = new EnvVariables
     {
         dictionary = new Dictionary<string, string>
         {
@@ -71,7 +71,7 @@ try
 
     // Adds the EnviromentVariable object to the project as a singleton.
     // It can now be accessed wihtin the entire projekt
-    builder.Services.AddSingleton<EnviromentVariables>(vaultSecrets);
+    builder.Services.AddSingleton<EnvVariables>(vaultSecrets);
     builder.Services.AddSingleton<IAuthenticationRepository, MongoDBService>();
 
 
