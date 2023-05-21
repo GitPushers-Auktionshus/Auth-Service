@@ -72,7 +72,7 @@ namespace AuthServiceAPI.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Fejl ved oprettelse af forbindelse: {ex.Message}");
+                _logger.LogError($"Error trying to connect to database: {ex.Message}");
 
                 throw;
             }
