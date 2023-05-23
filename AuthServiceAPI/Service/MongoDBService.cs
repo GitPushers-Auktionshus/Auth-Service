@@ -81,7 +81,7 @@ namespace AuthServiceAPI.Service
             {
                 _logger.LogInformation($"Authenticating user: {userDTO.Username}");
 
-                //Looks up our user in the DB
+                // Looks up our user in the DB
                 User user = await _users.Find(u => u.Username == userDTO.Username).FirstOrDefaultAsync<User>();
 
                 // Checks if user exists. If it doesn't or/and the password provided is false it returns unauthorized.
@@ -100,14 +100,17 @@ namespace AuthServiceAPI.Service
                 }
                 else
                 {
+                    // Hashes the provided password with the same salt used for creating the user
                     string hashedPassword = HashPassword(userDTO.Password, _salt);
 
+                    // If the hashed password is the same as the one in the database, the user i authorized
                     if (hashedPassword == user.Password)
                     {
                         _logger.LogInformation("User authorized");
 
                         return "Authorized";
                     }
+                    // If it doesn't match, the user is not authorized
                     else
                     {
                         _logger.LogError("Wrong password");
