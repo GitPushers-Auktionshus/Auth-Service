@@ -16,8 +16,8 @@ namespace AuthServiceAPI.Service
         private readonly ILogger<MongoDBService> _logger;
 
         // Initializes enviroment variables
-        private readonly string _databaseName;
-        private readonly string _collectionName;
+        private readonly string _usersDatabase;
+        private readonly string _userCollection;
         private readonly string? _secret;
         private readonly string? _issuer;
         private readonly string? _salt;
@@ -27,7 +27,7 @@ namespace AuthServiceAPI.Service
         private readonly IMongoCollection<User> _users;
         private readonly IConfiguration _config;
 
-        public MongoDBService(ILogger<MongoDBService> logger, IConfiguration config, EnviromentVariables vaultSecrets)
+        public MongoDBService(ILogger<MongoDBService> logger, IConfiguration config, EnvVariables vaultSecrets)
         {
             _logger = logger;
             _config = config;
@@ -35,8 +35,8 @@ namespace AuthServiceAPI.Service
             try
             {
                 // Retrieves enviroment variables from dockercompose file
-                _databaseName = config["DatabaseName"] ?? "DatabaseName missing";
-                _collectionName = config["CollectionName"] ?? "CollectionName missing";
+                _usersDatabase = config["UsersDatabase"] ?? "UsersDatabase missing";
+                _userCollection = config["UserCollection"] ?? "UserCollection missing";
 
                 // Retrieves enviroment variables from program.cs, from injected EnviromentVariables class 
                 _secret = vaultSecrets.dictionary["Secret"];
@@ -44,7 +44,7 @@ namespace AuthServiceAPI.Service
                 _salt = vaultSecrets.dictionary["Salt"];
                 _connectionURI = vaultSecrets.dictionary["ConnectionURI"];
 
-                _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, Salt: {_salt}, ConnectionURI: {_connectionURI}, DatabaseName: {_databaseName}, CollectionName: {_collectionName}");
+                _logger.LogInformation($"AuthService variables loaded in Auth-controller: Secret: {_secret}, Issuer: {_issuer}, Salt: {_salt}, ConnectionURI: {_connectionURI}, DatabaseName: {_usersDatabase}, CollectionName: {_userCollection}");
 
             }
             catch (Exception ex)
@@ -58,17 +58,21 @@ namespace AuthServiceAPI.Service
             {
                 // Sets MongoDB client
                 var mongoClient = new MongoClient(_connectionURI);
+                _logger.LogInformation($"[*] CONNECTION_URI: {_connectionURI}");
 
                 // Sets MongoDB Database
-                var userDatabase = mongoClient.GetDatabase(_databaseName);
+                var userDatabase = mongoClient.GetDatabase(_usersDatabase);
+                _logger.LogInformation($"[*] DATABASE: {_usersDatabase}");
+
 
                 // Sets MongoDB Collection
-                _users = userDatabase.GetCollection<User>(_collectionName);
+                _users = userDatabase.GetCollection<User>(_userCollection);
+                _logger.LogInformation($"[*] COLLECTION: {_userCollection}");
 
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Fejl ved oprettelse af forbindelse: {ex.Message}");
+                _logger.LogError($"Error trying to connect to database: {ex.Message}");
 
                 throw;
             }

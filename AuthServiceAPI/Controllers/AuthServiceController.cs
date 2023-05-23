@@ -38,7 +38,7 @@ public class AuthServiceController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
     {
-        _logger.LogInformation("Login Endpoint reached");
+        _logger.LogInformation("[POST] Login Endpoint reached");
 
         // Checks if user is authorized or not.If it is, it will generate a string JWT token and return it
         string authorizedStatus = await _service.LoginUser(userDTO);
