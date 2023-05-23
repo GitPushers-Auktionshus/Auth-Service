@@ -48,7 +48,7 @@ try
     IVaultClient vaultClient = new VaultClient(vaultClientSettings);
 
     // Uses vault client to read key-value secrets.
-    Secret<SecretData> enviromentVariables = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "enviromentVariables", mountPoint: "secret");
+    Secret<SecretData> enviromentVariables = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "environmentVariables", mountPoint: "secret");
     Secret<SecretData> connectionString = await vaultClient.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: "connectionStrings", mountPoint: "secret");
 
     // Initialized string variables to store enviroment secrets
