@@ -34,7 +34,6 @@ public class AuthServiceController : ControllerBase
     }
 
     // Login POST - Authorizes a user and returns a JWT-token
-    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] UserDTO userDTO)
     {
