@@ -20,7 +20,7 @@ public class AuthServiceTest
 
         var myConfiguration = new Dictionary<string, string?>
         {
-            {"UsersServiceBrokerHost", "http://testhost.local"}
+            {"AuthServiceBrokerHost", "http://testhost.local"}
         };
 
         _configuration = new ConfigurationBuilder()
