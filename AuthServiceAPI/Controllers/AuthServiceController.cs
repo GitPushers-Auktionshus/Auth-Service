@@ -39,21 +39,31 @@ public class AuthServiceController : ControllerBase
     {
         _logger.LogInformation("[POST] Login Endpoint reached");
 
-        // Checks if user is authorized or not.If it is, it will generate a string JWT token and return it
-        string authorizedStatus = await _service.LoginUser(userDTO);
-        if (authorizedStatus == "Unauthorized")
-        {
-            return Unauthorized();
-        }
-        else if (authorizedStatus == "Authorized")
-        {
-            var token = _service.GenerateJwtTokenToUser(userDTO.Username);
+        string authorizedStatus;
 
-            return Ok(new { token });
-        }
-        else
+        try
         {
-            return Unauthorized();
+            // Checks if user is authorized or not.If it is, it will generate a string JWT token and return it
+            authorizedStatus = await _service.LoginUser(userDTO);
+
+            if (authorizedStatus == "Unauthorized")
+            {
+                return Unauthorized();
+            }
+            else if (authorizedStatus == "Authorized")
+            {
+                var token = _service.GenerateJwtTokenToUser(userDTO.Username);
+
+                return Ok(new { token });
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
+        catch (Exception ex)
+        {
+            return BadRequest();
         }
     }
 }
