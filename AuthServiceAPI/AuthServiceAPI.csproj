@@ -18,6 +18,9 @@
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
     <PackageReference Include="NLog.Targets.Loki" Version="1.4.6" />
     <PackageReference Include="VaultSharp" Version="1.13.0.1" />
+    <PackageReference Include="BCrypt" Version="1.0.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="Moq" Version="4.18.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,5 +34,9 @@
     </None>
         <None Remove="NLog.Targets.Loki" />
         <None Remove="VaultSharp" />
+        <None Remove="Service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service\" />
   </ItemGroup>
 </Project>
