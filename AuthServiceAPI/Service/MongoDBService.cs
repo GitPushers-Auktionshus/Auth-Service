@@ -147,7 +147,7 @@ namespace AuthServiceAPI.Service
                 _issuer,
                 "http://localhost",
                 claims,
-                expires: DateTime.Now.AddMinutes(60),
+                expires: DateTime.Now.AddMinutes(1440),
                 signingCredentials: credentials);
 
             _logger.LogInformation($"Generated token for user {username}");
